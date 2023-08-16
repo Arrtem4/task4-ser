@@ -26,10 +26,10 @@ const getUser = (id) => {
             [id],
             (error, results) => {
                 if (error) {
-                    reject(error);
+                    return reject(error);
                 }
                 if (results) {
-                    resolve(results.rows);
+                    return resolve(results.rows);
                 }
             }
         );
