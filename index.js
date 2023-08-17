@@ -47,14 +47,23 @@ const accessCheck = async (req) => {
     const response = await db.getUser(user.id);
     if (response[0].Blocked) {
         throw new Error("blocked");
-    } else {
-        return "ok";
     }
 };
 const logOut = async (req) => {
     req.session.user = null;
 };
-
+app.post("/login", (req, res) => {
+    db.login(req.body)
+        .then((response) => {
+            req.session.user = {
+                JWT: generateAccessToken(response.rows[0].Id),
+            };
+            res.status(200).json({});
+        })
+        .catch((error) => {
+            res.status(403).json({ error });
+        });
+});
 app.get("/logOut", (req, res) => {
     logOut(req)
         .then((response) => {
@@ -73,17 +82,8 @@ app.get("/auth", (req, res) => {
             res.status(500).send(error);
         });
 });
-app.get("/", (_, res) => {
+app.get("/getUsers", (_, res) => {
     db.getUsers()
-        .then((response) => {
-            res.status(200).send(response);
-        })
-        .catch((error) => {
-            res.status(500).send(error);
-        });
-});
-app.get("/userId/:id", (req, res) => {
-    db.getUser(req.params.id)
         .then((response) => {
             res.status(200).send(response);
         })
@@ -103,21 +103,8 @@ app.post("/registration", (req, res) => {
             res.status(403).json({ error });
         });
 });
-app.post("/login", (req, res) => {
-    db.login(req.body)
-        .then((response) => {
-            req.session.user = {
-                JWT: generateAccessToken(response.rows[0].Id),
-            };
-            res.status(200).json({});
-        })
-        .catch((error) => {
-            res.status(403).json({ error });
-        });
-});
-// app.delete("/users/:id", (req, res) => {
-//     users
-//         .deleteUser(req.params.id)
+// app.get("/userId/:id", (req, res) => {
+//     db.getUser(req.params.id)
 //         .then((response) => {
 //             res.status(200).send(response);
 //         })
@@ -125,6 +112,33 @@ app.post("/login", (req, res) => {
 //             res.status(500).send(error);
 //         });
 // });
+app.post("/blockUsers", (req, res) => {
+    db.blockUsers(req.body.selectedUsers)
+        .then((response) => {
+            res.status(200).send(response);
+        })
+        .catch((error) => {
+            res.status(500).send(error);
+        });
+});
+app.post("/unblockUsers", (req, res) => {
+    db.unblockUsers(req.body.selectedUsers)
+        .then((response) => {
+            res.status(200).send(response);
+        })
+        .catch((error) => {
+            res.status(500).send(error);
+        });
+});
+app.post("/deleteUsers", (req, res) => {
+    db.deleteUsers(req.body.selectedUsers)
+        .then((response) => {
+            res.status(200).send(response);
+        })
+        .catch((error) => {
+            res.status(500).send(error);
+        });
+});
 app.listen(port, () => {
     console.log(`App running on port ${port}.`);
 });
