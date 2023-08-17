@@ -1,15 +1,17 @@
 const express = require("express");
 const session = require("cookie-session");
+const helmet = require("helmet");
 const hpp = require("hpp");
 const db = require("./userModel");
 const jwt = require("jsonwebtoken");
 const port = 3001;
 const app = express();
-
+app.use(helmet());
 app.use(hpp());
 app.use(express.json());
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.header("Access-Control-Allow-Credentials", true);
     res.header(
         "Access-Control-Allow-Headers",
         "Origin, X-Requested-With, Content-Type, Accept"
@@ -25,47 +27,52 @@ app.use(
     })
 );
 
-const accessCheck = (req, res) => {
-    const token = req.session?.user?.JWT;
-    if (!token) {
-        return res.status(401).send("Unauthorized request");
-    }
-    jwt.verify(token, "task4", (err, decoded) => {
-        if (err) {
-            return res.status(401).send("Unauthorized request");
-        }
-        console.log(decoded);
-        db.getUser(decoded.id)
-            .then((response) => {
-                console.log("1weew");
-                console.log(response);
-                if (response[0].Blocked) {
-                    console.log(`3`)
-                     res.status(401).send("Unauthorized request");
-                }
-            })
-            .catch((error) => {
-                console.log("2");
-                 res.status(500).send(error);
-            });
-    });
-    return true;
-};
-
 const generateAccessToken = (id) => {
     const payload = {
         id,
     };
     return jwt.sign(payload, "task4", { expiresIn: "24h" });
 };
-
-app.get("/auth", (req, res) => {
-    if (!accessCheck(req, res)) {
-        return res.status(500).send(`undefined error`);
+const accessCheck = async (req) => {
+    const token = req.session?.user?.JWT;
+    if (!token) {
+        throw new Error("no token");
     }
-    return res.status(200).send();
-});
+    const user = jwt.verify(token, "task4", (err, decoded) => {
+        if (err) {
+            throw new Error("token error");
+        }
+        return decoded;
+    });
+    const response = await db.getUser(user.id);
+    if (response[0].Blocked) {
+        throw new Error("blocked");
+    } else {
+        return "ok";
+    }
+};
+const logOut = async (req) => {
+    req.session.user = null;
+};
 
+app.get("/logOut", (req, res) => {
+    logOut(req)
+        .then((response) => {
+            res.status(200).send(response);
+        })
+        .catch((error) => {
+            res.status(500).send(error);
+        });
+});
+app.get("/auth", (req, res) => {
+    accessCheck(req)
+        .then((response) => {
+            res.status(200).send(response);
+        })
+        .catch((error) => {
+            res.status(500).send(error);
+        });
+});
 app.get("/", (_, res) => {
     db.getUsers()
         .then((response) => {
@@ -84,25 +91,16 @@ app.get("/userId/:id", (req, res) => {
             res.status(500).send(error);
         });
 });
-app.get("/user/:email", (req, res) => {
-    db.CheckEmail(req.params.email)
-        .then((response) => {
-            res.status(200).send(response);
-        })
-        .catch((error) => {
-            res.status(500).send(error);
-        });
-});
 app.post("/registration", (req, res) => {
     db.registration(req.body)
         .then((response) => {
             req.session.user = {
                 JWT: generateAccessToken(response.rows[0].Id),
             };
-            res.status(200);
+            res.status(200).json({});
         })
         .catch((error) => {
-            res.status(403).send(error);
+            res.status(403).json({ error });
         });
 });
 app.post("/login", (req, res) => {
@@ -111,14 +109,12 @@ app.post("/login", (req, res) => {
             req.session.user = {
                 JWT: generateAccessToken(response.rows[0].Id),
             };
-            console.log(req.session.user);
-            res.status(200).send(`ok`);
+            res.status(200).json({});
         })
         .catch((error) => {
             res.status(403).json({ error });
         });
 });
-
 // app.delete("/users/:id", (req, res) => {
 //     users
 //         .deleteUser(req.params.id)

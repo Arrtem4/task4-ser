@@ -35,20 +35,6 @@ const getUser = (id) => {
         );
     });
 };
-const CheckEmail = (email) => {
-    return new Promise(function (resolve, reject) {
-        pool.query(
-            `SELECT "Email" FROM users WHERE "Email" = $1`,
-            [email],
-            (error, results) => {
-                if (error) {
-                    reject(error);
-                }
-                resolve(results);
-            }
-        );
-    });
-};
 const registration = ({
     email,
     name,
@@ -58,11 +44,22 @@ const registration = ({
 }) => {
     return new Promise(function (resolve, reject) {
         pool.query(
-            'INSERT INTO users ("Email","Password","Name","RegistrationDate", "SignInDate") VALUES ($1,$2,$3,$4,$5) RETURNING "Id"',
+            `WITH inserted AS (
+                INSERT INTO users ("Email","Password","Name","RegistrationDate", "SignInDate")
+                SELECT $1,$2,$3,$4,$5
+                WHERE NOT EXISTS (
+                    SELECT "Email" FROM users WHERE "Email" = $1
+                )
+             RETURNING "Id"
+            )
+            SELECT "Id" FROM inserted;`,
             [email, hashPassword, name, RegistrationDate, SignInDate],
             (error, results) => {
                 if (error) {
                     reject(error);
+                }
+                if (results.rows.length === 0) {
+                    reject("There's already a user with that email");
                 }
                 resolve(results);
             }
@@ -107,9 +104,7 @@ const login = ({ email, hashPassword, signInDate }) => {
 
 module.exports = {
     getUsers,
-    CheckEmail,
     registration,
     login,
     getUser,
-    // deleteUser,
 };
