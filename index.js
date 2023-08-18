@@ -59,7 +59,7 @@ app.post("/login", async (req, res) => {
         req.session.user = {
             JWT: generateAccessToken(response.rows[0].Id),
         };
-        res.status(200).json({});
+        res.status(200).send(response);
     } catch (error) {
         res.status(403).json({ error });
     }
@@ -95,7 +95,7 @@ app.post("/registration", async (req, res) => {
         req.session.user = {
             JWT: generateAccessToken(response.rows[0].Id),
         };
-        res.status(200).json({});
+        res.status(200).send(response);
     } catch (error) {
         res.status(403).json({ error });
     }
