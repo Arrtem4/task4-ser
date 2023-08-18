@@ -61,7 +61,8 @@ app.post("/login", async (req, res) => {
         };
         res.status(200).send(response);
     } catch (error) {
-        res.status(403).json({ error });
+        const errorMessage = error.message;
+        res.status(403).json({ errorMessage });
     }
 });
 app.get("/logOut", async (req, res) => {
@@ -97,7 +98,8 @@ app.post("/registration", async (req, res) => {
         };
         res.status(200).send(response);
     } catch (error) {
-        res.status(403).json({ error });
+        const errorMessage = error.message;
+        res.status(403).json({ errorMessage });
     }
 });
 app.post("/blockUsers", async (req, res) => {
