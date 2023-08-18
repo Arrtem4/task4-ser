@@ -59,17 +59,19 @@ const blockUsers = async (selectedUsers) => {
     );
     return result;
 };
-const unblockUsers =async(selectedUsers) => {
+const unblockUsers = async (selectedUsers) => {
     const result = await pool.query(
         `UPDATE users SET "Blocked" = 'false' WHERE "Id" = ANY ($1);`,
-        [selectedUsers])
-        return result;
+        [selectedUsers]
+    );
+    return result;
 };
-const deleteUsers =async(selectedUsers) => {
+const deleteUsers = async (selectedUsers) => {
     const result = await pool.query(
         `DELETE FROM users WHERE "Id" = ANY ($1);`,
-        [selectedUsers])
-        return result;
+        [selectedUsers]
+    );
+    return result;
 };
 
 module.exports = {
