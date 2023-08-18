@@ -1,5 +1,6 @@
 const express = require("express");
 const session = require("cookie-session");
+require("dotenv").config();
 const helmet = require("helmet");
 const hpp = require("hpp");
 const db = require("./userModel");
@@ -31,113 +32,100 @@ const generateAccessToken = (id) => {
     const payload = {
         id,
     };
-    return jwt.sign(payload, "task4", { expiresIn: "24h" });
+    return jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: "24h" });
 };
 const accessCheck = async (req) => {
     const token = req.session?.user?.JWT;
     if (!token) {
-        throw new Error("no token");
+        throw new Error("No token");
     }
-    const user = jwt.verify(token, "task4", (err, decoded) => {
+    const user = jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
         if (err) {
-            throw new Error("token error");
+            throw new Error("Incorrect token");
         }
         return decoded;
     });
     const response = await db.getUser(user.id);
     if (response[0].Blocked) {
-        throw new Error("blocked");
+        throw new Error("User blocked");
     }
 };
 const logOut = async (req) => {
     req.session.user = null;
 };
-app.post("/login", (req, res) => {
-    db.login(req.body)
-        .then((response) => {
-            req.session.user = {
-                JWT: generateAccessToken(response.rows[0].Id),
-            };
-            res.status(200).json({});
-        })
-        .catch((error) => {
-            res.status(403).json({ error });
-        });
+app.post("/login", async (req, res) => {
+    try {
+        const response = await db.login(req.body);
+        req.session.user = {
+            JWT: generateAccessToken(response.rows[0].Id),
+        };
+        res.status(200).json({});
+    } catch (error) {
+        res.status(403).json({ error });
+    }
 });
-app.get("/logOut", (req, res) => {
-    logOut(req)
-        .then((response) => {
-            res.status(200).send(response);
-        })
-        .catch((error) => {
-            res.status(500).send(error);
-        });
+app.get("/logOut", async (req, res) => {
+    try {
+        const response = await logOut(req);
+        res.status(200).send(response);
+    } catch (error) {
+        res.status(500).send(error);
+    }
 });
-app.get("/auth", (req, res) => {
-    accessCheck(req)
-        .then((response) => {
-            res.status(200).send(response);
-        })
-        .catch((error) => {
-            res.status(500).send(error);
-        });
+app.get("/auth", async (req, res) => {
+    try {
+        const response = await accessCheck(req);
+        res.status(200).send(response);
+    } catch (error) {
+        res.status(500).send(error);
+    }
 });
-app.get("/getUsers", (_, res) => {
-    db.getUsers()
-        .then((response) => {
-            res.status(200).send(response);
-        })
-        .catch((error) => {
-            res.status(500).send(error);
-        });
+app.get("/getUsers", async (req, res) => {
+    try {
+        await accessCheck(req);
+        const response = await db.getUsers();
+        res.status(200).send(response);
+    } catch (error) {
+        res.status(500).send(error);
+    }
 });
-app.post("/registration", (req, res) => {
-    db.registration(req.body)
-        .then((response) => {
-            req.session.user = {
-                JWT: generateAccessToken(response.rows[0].Id),
-            };
-            res.status(200).json({});
-        })
-        .catch((error) => {
-            res.status(403).json({ error });
-        });
+app.post("/registration", async (req, res) => {
+    try {
+        const response = await db.registration(req.body);
+        req.session.user = {
+            JWT: generateAccessToken(response.rows[0].Id),
+        };
+        res.status(200).json({});
+    } catch (error) {
+        res.status(403).json({ error });
+    }
 });
-// app.get("/userId/:id", (req, res) => {
-//     db.getUser(req.params.id)
-//         .then((response) => {
-//             res.status(200).send(response);
-//         })
-//         .catch((error) => {
-//             res.status(500).send(error);
-//         });
-// });
-app.post("/blockUsers", (req, res) => {
-    db.blockUsers(req.body.selectedUsers)
-        .then((response) => {
-            res.status(200).send(response);
-        })
-        .catch((error) => {
-            res.status(500).send(error);
-        });
+app.post("/blockUsers", async (req, res) => {
+    try {
+        await accessCheck(req);
+        const response = await db.blockUsers(req.body.selectedUsers);
+        res.status(200).send(response);
+    } catch (error) {
+        res.status(500).send(error);
+    }
 });
-app.post("/unblockUsers", (req, res) => {
-    db.unblockUsers(req.body.selectedUsers)
-        .then((response) => {
-            res.status(200).send(response);
-        })
-        .catch((error) => {
-            res.status(500).send(error);
-        });
+app.post("/unblockUsers", async (req, res) => {
+    try {
+        await accessCheck(req);
+        const response = await db.unblockUsers(req.body.selectedUsers);
+        res.status(200).send(response);
+    } catch (error) {
+        res.status(500).send(error);
+    }
 });
-app.post("/deleteUsers", (req, res) => {
-    db.deleteUsers(req.body.selectedUsers)
-        .then((response) => {
-            res.status(200).send(response);
-        })
-        .catch((error) => {
-            res.status(500).send(error);
-        });
+app.post("/deleteUsers", async (req, res) => {
+    try {
+        await accessCheck(req);
+        const response = await db.deleteUsers(req.body.selectedUsers);
+        res.status(200).send(response);
+    } catch (error) {
+        res.status(500).send(error);
+    }
 });
 app.listen(port, () => {
     console.log(`App running on port ${port}.`);
