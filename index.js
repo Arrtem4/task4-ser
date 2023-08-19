@@ -11,7 +11,7 @@ app.use(helmet());
 app.use(hpp());
 app.use(express.json());
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin");
+    res.header("Access-Control-Allow-Origin", "https://arrtem4.github.io");
     res.header("Access-Control-Allow-Credentials", true);
     res.header(
         "Access-Control-Allow-Headers",
@@ -24,7 +24,7 @@ app.use(
         name: "session",
         secret: process.env.SECRET_KEY,
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        secure: true,
+        // secure: true,
     })
 );
 
