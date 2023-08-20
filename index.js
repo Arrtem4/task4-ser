@@ -67,7 +67,7 @@ app.get("/logOut", (req, res) => {
     try {
         req.session = null;
         console.log(`del`, req.session);
-        res.clearCookie("session", { path: "/" }).status(200).send("Ok");
+        res.clearCookie("session").status(200).send("Ok");
     } catch (error) {
         res.status(500).send(error);
     }
