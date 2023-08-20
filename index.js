@@ -17,7 +17,6 @@ app.use(
         sameSite: "none",
         secure: true,
         httpOnly: true,
-        unset: "destroy",
     })
 );
 app.use(
@@ -58,7 +57,7 @@ app.post("/login", async (req, res) => {
         req.session.user = {
             JWT: generateAccessToken(response.rows[0].Id),
         };
-        res.sendStatus(200);
+        res.status(200).send();
     } catch (error) {
         const errorMessage = error.message;
         res.status(403).json({ errorMessage });
@@ -66,10 +65,8 @@ app.post("/login", async (req, res) => {
 });
 app.get("/logOut", async (req, res) => {
     try {
-        req.session.destroy;
-        req.session = null;
-        res.clearCookie("session", { path: "/" });
-        res.sendStatus(200);
+        delete req.session.user;
+        res.status(200).send();
     } catch (error) {
         res.status(500).send(error);
     }
@@ -77,7 +74,7 @@ app.get("/logOut", async (req, res) => {
 app.get("/auth", async (req, res) => {
     try {
         await accessCheck(req);
-        res.sendStatus(200);
+        res.status(200).send();
     } catch (error) {
         res.status(500).send(error);
     }
@@ -97,7 +94,7 @@ app.post("/registration", async (req, res) => {
         req.session.user = {
             JWT: generateAccessToken(response.rows[0].Id),
         };
-        res.sendStatus(200);
+        res.status(200).send(response);
     } catch (error) {
         const errorMessage = error.message;
         res.status(403).json({ errorMessage });
@@ -107,7 +104,7 @@ app.post("/blockUsers", async (req, res) => {
     try {
         await accessCheck(req);
         const response = await db.blockUsers(req.body.selectedUsers);
-        res.sendStatus(200);
+        res.status(200).send(response);
     } catch (error) {
         res.status(500).send(error);
     }
@@ -116,7 +113,7 @@ app.post("/unblockUsers", async (req, res) => {
     try {
         await accessCheck(req);
         const response = await db.unblockUsers(req.body.selectedUsers);
-        res.sendStatus(200);
+        res.status(200).send(response);
     } catch (error) {
         res.status(500).send(error);
     }
@@ -125,7 +122,7 @@ app.post("/deleteUsers", async (req, res) => {
     try {
         await accessCheck(req);
         const response = await db.deleteUsers(req.body.selectedUsers);
-        res.sendStatus(200);
+        res.status(200).send(response);
     } catch (error) {
         res.status(500).send(error);
     }
