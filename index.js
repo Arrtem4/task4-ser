@@ -1,34 +1,46 @@
-const express = require("express");
-const session = require("cookie-session");
-require("dotenv").config();
-const helmet = require("helmet");
-const hpp = require("hpp");
+import express, { Application } from "express";
+import cors from "cors";
+import session from "cookie-session";
+
+// require("dotenv").config();
+// const helmet = require("helmet");
+// const hpp = require("hpp");
+
 const db = require("./userModel");
 const jwt = require("jsonwebtoken");
 const port = 3001;
 const app = express();
-app.use(helmet());
-app.use(hpp());
+
+// app.use(helmet());
+// app.use(hpp());
 app.use(express.json());
-app.use((req, res, next) => {
-    res.header(
-        "Access-Control-Allow-Origin",
-        "https://task-4-b9yf.onrender.com"
-    );
-    res.header("Access-Control-Allow-Credentials", true);
-    res.header(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept"
-    );
-    next();
-});
+// app.use((req, res, next) => {
+//     res.header(
+//         "Access-Control-Allow-Origin",
+//         "https://task-4-b9yf.onrender.com"
+//     );
+//     res.header("Access-Control-Allow-Credentials", true);
+//     res.header(
+//         "Access-Control-Allow-Headers",
+//         "Origin, X-Requested-With, Content-Type, Accept"
+//     );
+//     next();
+// });
 app.use(
     session({
         name: "session",
         secret: process.env.SECRET_KEY,
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
         sameSite: "none",
-        secure: false,
+        secure: true,
+        httpOnly: true,
+    })
+);
+app.enable("trust proxy");
+app.use(
+    cors({
+        credentials: true,
+        origin: "https://task-4-b9yf.onrender.com/",
     })
 );
 
