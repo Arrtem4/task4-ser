@@ -63,11 +63,11 @@ app.post("/login", async (req, res) => {
         res.status(403).json({ errorMessage });
     }
 });
-app.get("/logOut", (req, res) => {
+app.get("/logOut", async (req, res) => {
     try {
-        req.session = null;
-        console.log(`del`, req.session);
-        res.clearCookie("session").status(200).send("Ok");
+        req.session.user = null;
+        console.log(`del`);
+        res.status(200).send();
     } catch (error) {
         res.status(500).send(error);
     }
