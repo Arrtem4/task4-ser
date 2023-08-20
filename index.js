@@ -33,6 +33,7 @@ const generateAccessToken = (id) => {
     return jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: "24h" });
 };
 const accessCheck = async (req) => {
+    console.log(`access`, req.session.user);
     const token = req.session?.user?.JWT;
     if (!token) {
         throw new Error("No token");
@@ -56,7 +57,7 @@ app.post("/login", async (req, res) => {
         req.session.user = {
             JWT: generateAccessToken(response.rows[0].Id),
         };
-        res.status(200).send(response);
+        res.sendStatus(200);
     } catch (error) {
         const errorMessage = error.message;
         res.status(403).json({ errorMessage });
@@ -73,7 +74,7 @@ app.get("/logOut", async (req, res) => {
 });
 app.get("/auth", async (req, res) => {
     try {
-        const response = await accessCheck(req);
+        await accessCheck(req);
         res.sendStatus(200);
     } catch (error) {
         res.status(500).send(error);
