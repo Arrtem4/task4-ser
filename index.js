@@ -17,6 +17,7 @@ app.use(
         sameSite: "none",
         secure: true,
         httpOnly: true,
+        unset: "destroy",
     })
 );
 app.use(
@@ -65,8 +66,9 @@ app.post("/login", async (req, res) => {
 });
 app.get("/logOut", async (req, res) => {
     try {
-        req.session.user = null;
-        console.log(req.session.user);
+        req.session.destroy;
+        req.session = null;
+        res.clearCookie("session", { path: "/" });
         res.sendStatus(200);
     } catch (error) {
         res.status(500).send(error);
