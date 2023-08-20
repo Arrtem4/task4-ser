@@ -48,9 +48,7 @@ const accessCheck = async (req) => {
         throw new Error("User blocked");
     }
 };
-const logOut = async (req) => {
-    req.session.user = null;
-};
+
 app.post("/login", async (req, res) => {
     try {
         const response = await db.login(req.body);
@@ -65,8 +63,8 @@ app.post("/login", async (req, res) => {
 });
 app.get("/logOut", async (req, res) => {
     try {
-        const response = await logOut(req);
-        res.status(200).send(response);
+        req.session.user = null;
+        res.status(200).send();
     } catch (error) {
         res.status(500).send(error);
     }
