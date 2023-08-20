@@ -45,6 +45,7 @@ const accessCheck = async (req) => {
     });
     const response = await db.getUser(user.id);
     if (response[0].Blocked) {
+        req.session.user = null;
         throw new Error("User blocked");
     }
 };
@@ -64,7 +65,8 @@ app.post("/login", async (req, res) => {
 app.get("/logOut", async (req, res) => {
     try {
         req.session.user = null;
-        res.status(200).send();
+        console.log(req.session.user);
+        res.sendStatus(200);
     } catch (error) {
         res.status(500).send(error);
     }
@@ -72,7 +74,7 @@ app.get("/logOut", async (req, res) => {
 app.get("/auth", async (req, res) => {
     try {
         const response = await accessCheck(req);
-        res.status(200).send(response);
+        res.sendStatus(200);
     } catch (error) {
         res.status(500).send(error);
     }
@@ -92,7 +94,7 @@ app.post("/registration", async (req, res) => {
         req.session.user = {
             JWT: generateAccessToken(response.rows[0].Id),
         };
-        res.status(200).send(response);
+        res.sendStatus(200);
     } catch (error) {
         const errorMessage = error.message;
         res.status(403).json({ errorMessage });
@@ -102,7 +104,7 @@ app.post("/blockUsers", async (req, res) => {
     try {
         await accessCheck(req);
         const response = await db.blockUsers(req.body.selectedUsers);
-        res.status(200).send(response);
+        res.sendStatus(200);
     } catch (error) {
         res.status(500).send(error);
     }
@@ -111,7 +113,7 @@ app.post("/unblockUsers", async (req, res) => {
     try {
         await accessCheck(req);
         const response = await db.unblockUsers(req.body.selectedUsers);
-        res.status(200).send(response);
+        res.sendStatus(200);
     } catch (error) {
         res.status(500).send(error);
     }
@@ -120,7 +122,7 @@ app.post("/deleteUsers", async (req, res) => {
     try {
         await accessCheck(req);
         const response = await db.deleteUsers(req.body.selectedUsers);
-        res.status(200).send(response);
+        res.sendStatus(200);
     } catch (error) {
         res.status(500).send(error);
     }
