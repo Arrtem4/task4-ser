@@ -23,7 +23,7 @@ app.enable("trust proxy");
 app.use(
     cors({
         credentials: true,
-        origin: "https://task-4-b9yf.onrender.com",
+        origin: ["https://task-4-b9yf.onrender.com", "http://localhost:3000"],
     })
 );
 
