@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const session = require("cookie-session");
+require("dotenv").config();
 
-// require("dotenv").config();
 // const helmet = require("helmet");
 // const hpp = require("hpp");
 
