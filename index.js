@@ -1,6 +1,6 @@
 const express = require("express");
-import cors from "cors";
-import session from "cookie-session";
+const cors = require("cors");
+const session = require("cookie-session");
 
 // require("dotenv").config();
 // const helmet = require("helmet");
