@@ -13,7 +13,7 @@ app.use(express.json());
 app.use((req, res, next) => {
     res.header(
         "Access-Control-Allow-Origin",
-        "https://task4-8rt1.onrender.com"
+        "https://task-4-b9yf.onrender.com"
     );
     res.header("Access-Control-Allow-Credentials", true);
     res.header(
