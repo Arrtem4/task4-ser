@@ -11,10 +11,6 @@ app.use(helmet());
 app.use(hpp());
 app.use(express.json());
 app.use((req, res, next) => {
-    res.header(
-        "Access-Control-Allow-Origin",
-        "https://task-4-b9yf.onrender.com"
-    );
     res.header("Access-Control-Allow-Credentials", true);
     res.header(
         "Access-Control-Allow-Headers",
