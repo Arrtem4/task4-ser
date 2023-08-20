@@ -1,4 +1,4 @@
-import express, { Application } from "express";
+import express from "express";
 import cors from "cors";
 import session from "cookie-session";
 
