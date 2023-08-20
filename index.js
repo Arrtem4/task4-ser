@@ -11,7 +11,10 @@ app.use(helmet());
 app.use(hpp());
 app.use(express.json());
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "https://arrtem4.github.io");
+    res.header(
+        "Access-Control-Allow-Origin",
+        "https://task4-8rt1.onrender.com"
+    );
     res.header("Access-Control-Allow-Credentials", true);
     res.header(
         "Access-Control-Allow-Headers",
